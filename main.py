@@ -12,7 +12,9 @@ PROXY = 'http://127.0.0.1:7897'
 class SmaCross(bt.Strategy):
     # list of parameters which are configurable for the strategy
     params = (
-        ('exitbars', 5),  # number of bars to hold position
+        ('sma_fast_period', 10),  # number of bars to hold position
+        ('sma_slow_period', 30),  # number of bars to hold position
+        ('rsi_period', 14),  # number of bars to hold position
     )
 
     def log(self, txt, dt=None):
@@ -23,8 +25,9 @@ class SmaCross(bt.Strategy):
     def __init__(self):
         self.dataclose = self.datas[0].close
         self.log('Initializing strategy...')
-        self.order = None
-
+        self.sma_fast = bt.indicators.SimpleMovingAverage(self.datas[0], period=self.params.sma_fast_period)
+        self.sma_slow = bt.indicators.SimpleMovingAverage(self.datas[0], period=self.params.sma_slow_period)
+        self.rsi = bt.indicators.RSI(self.datas[0], period=self.params.rsi_period)
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
             self.log(f'Order {order.getstatusname()}')
@@ -40,16 +43,13 @@ class SmaCross(bt.Strategy):
             self.order = None
 
     def next(self):
-        if len(self) == 1:
-            if not self.position:
-                self.log(f'BUY CREATE {self.dataclose[0]:.2f}')
-                self.order = self.buy()
-        elif len(self) >= (self.bar_executed + self.params.exitbars):
-            if self.position:
-                self.log(f'SELL CREATE {self.dataclose[0]:.2f}')
-                self.order = self.sell()
-            
-
+        #if self.sma_fast[0] > self.sma_slow[0] and self.position.size == 0:
+        #    self.log(f'BUY CREATE, Price: {self.dataclose[0]:.2f}')
+        #    self.buy()
+        #elif self.sma_fast[0] < self.sma_slow[0] and self.position.size > 0:
+        #   self.log(f'SELL CREATE, Price: {self.dataclose[0]:.2f}')
+        #    self.sell()
+        pass
 
 def setup_proxy(proxy_url):
     os.environ['HTTP_PROXY'] = proxy_url
@@ -87,7 +87,7 @@ def main():
     cerebro.broker.setcommission(commission=commission)
     cerebro.addstrategy(SmaCross)
     cerebro.run()
-    cerebro.plot()
+    cerebro.plot(style='candlestick', barup='green', bardown='red', volume=True, iplot=False, show=False)
 
 
 if __name__ == "__main__":

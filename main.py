@@ -15,6 +15,9 @@ class SmaCross(bt.Strategy):
         ('sma_fast_period', 10),  # number of bars to hold position
         ('sma_slow_period', 30),  # number of bars to hold position
         ('rsi_period', 14),  # number of bars to hold position
+        ('rsi_overbought', 70),  # number of bars to hold position
+        ('rsi_oversold', 30),  # number of bars to hold position
+        ('rsi_smooth_period', 10),  # number of bars to hold position
     )
 
     def log(self, txt, dt=None):
@@ -28,6 +31,8 @@ class SmaCross(bt.Strategy):
         self.sma_fast = bt.indicators.SimpleMovingAverage(self.datas[0], period=self.params.sma_fast_period)
         self.sma_slow = bt.indicators.SimpleMovingAverage(self.datas[0], period=self.params.sma_slow_period)
         self.rsi = bt.indicators.RSI(self.datas[0], period=self.params.rsi_period)
+        self.rsi_smooth = bt.indicators.SimpleMovingAverage(self.rsi, period=self.params.rsi_smooth_period)
+
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
             self.log(f'Order {order.getstatusname()}')
@@ -40,7 +45,7 @@ class SmaCross(bt.Strategy):
             self.bar_executed = len(self)
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:
             self.log(f'Order {order.getstatusname()}')
-            self.order = None
+            #self.order = None
 
     def next(self):
         #if self.sma_fast[0] > self.sma_slow[0] and self.position.size == 0:
@@ -49,7 +54,12 @@ class SmaCross(bt.Strategy):
         #elif self.sma_fast[0] < self.sma_slow[0] and self.position.size > 0:
         #   self.log(f'SELL CREATE, Price: {self.dataclose[0]:.2f}')
         #    self.sell()
-        pass
+        if self.rsi[0] < self.params.rsi_oversold and self.position.size == 0:
+            self.log(f'BUY CREATE, Price: {self.dataclose[0]:.2f}')
+            self.buy()
+        elif self.rsi[0] > self.params.rsi_overbought and self.position.size > 0:
+            self.log(f'SELL CREATE, Price: {self.dataclose[0]:.2f}')
+            self.sell()
 
 def setup_proxy(proxy_url):
     os.environ['HTTP_PROXY'] = proxy_url
@@ -88,6 +98,7 @@ def main():
     cerebro.addstrategy(SmaCross)
     cerebro.run()
     cerebro.plot(style='candlestick', barup='green', bardown='red', volume=True, iplot=False, show=False)
+    print(f"Final Portfolio Value: {cerebro.broker.getvalue():.2f}")
 
 
 if __name__ == "__main__":

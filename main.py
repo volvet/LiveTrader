@@ -5,6 +5,7 @@ import os
 import pandas as pd
 import datetime
 
+from strategies.ChainStrategy import ChainStrategy
 
 PROXY = 'http://127.0.0.1:7897'
 
@@ -68,7 +69,7 @@ def setup_proxy(proxy_url):
 def main():
     setup_proxy(PROXY)
     ticker = 'AAPL'
-    start_data = '2025-01-01'
+    start_data = '2023-01-01'
     end_data = '2025-12-31'
     print(f"Downloading data for {ticker} from {start_data} to {end_data}...")
     try:
@@ -95,7 +96,7 @@ def main():
     cerebro.broker.setcash(initial_cash)
     commission = 0.001  # 0.1% commission
     cerebro.broker.setcommission(commission=commission)
-    cerebro.addstrategy(SmaCross)
+    cerebro.addstrategy(ChainStrategy)
     cerebro.run()
     cerebro.plot(style='candlestick', barup='green', bardown='red', volume=True, iplot=False, show=False)
     print(f"Final Portfolio Value: {cerebro.broker.getvalue():.2f}")

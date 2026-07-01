@@ -8,6 +8,7 @@ import datetime
 from strategies.ChainStrategy import ChainStrategy
 from strategies.MultilineIndicatorStrategy import MultilineIndicatorStrategy
 from strategies.AdxStrategy import AdxStrategy
+from strategies.BollingerBandsStrategy import BBandsMeansReversionStrategy
 
 PROXY = 'http://127.0.0.1:7897'
 
@@ -45,7 +46,7 @@ def main():
     cerebro.broker.setcash(initial_cash)
     commission = 0.001  # 0.1% commission
     cerebro.broker.setcommission(commission=commission)
-    cerebro.addstrategy(AdxStrategy)
+    cerebro.addstrategy(BBandsMeansReversionStrategy)
     cerebro.run()
     cerebro.plot(style='candlestick', barup='green', bardown='red', volume=True, iplot=False, show=False)
     print(f"Final Portfolio Value: {cerebro.broker.getvalue():.2f}")

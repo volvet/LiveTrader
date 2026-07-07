@@ -9,12 +9,7 @@ from strategies.ChainStrategy import ChainStrategy
 from strategies.MultilineIndicatorStrategy import MultilineIndicatorStrategy
 from strategies.AdxStrategy import AdxStrategy
 from strategies.BollingerBandsStrategy import BBandsMeansReversionStrategy
-
-PROXY = 'http://127.0.0.1:7897'
-
-def setup_proxy(proxy_url):
-    os.environ['HTTP_PROXY'] = proxy_url
-    os.environ['HTTPS_PROXY'] = proxy_url
+from utils.net import setup_proxy, PROXY
 
 def main():
     setup_proxy(PROXY)

@@ -86,6 +86,30 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
         except:
             return 'unknown', 0
         
+    def update_regime_state(self):
+        new_regime, confidence = self.classify_regime()
+        self.regime_history.append(new_regime)
+        if len(self.regime_history) > self.params.regime_confirmation*2:
+            self.regime_history = self.regime_history[-self.params.regime_confirmation*2:]
+            
+        if len(self.regime_history) >= self.params.regime_confirmation:
+            recent_regimes = self.regime_history[-self.params.regime_confirmation:]
+            if all(r == new_regime for r in recent_regimes):
+                if self.current_regime != new_regime:
+                    self.current_regime = new_regime
+                    self.regime_confidence = confidence
+            else:
+                self.regime_confidence = confidence
+                
+    def calculate_regime_position_size(self):
+        try:
+            return self.params.max_position_pct
+        except:
+            return self.params.min_position_pct
+        
+        
+        
+        
     def next(self):
         if not self.position and self.cross > 0:
             self.buy()

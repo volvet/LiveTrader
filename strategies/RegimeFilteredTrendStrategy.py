@@ -116,7 +116,7 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
         except:
             return self.params.min_position_pct
 
-    def calculate_adaptive_stop_multiplier(self):
+    def get_adaptive_stop_multiplier(self):
         if self.current_regime == 'trending':
             best_mult = self.params.trail_atr_mult
             if len(self.volatility_history) >= 5:
@@ -130,14 +130,67 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
         else:
             return self.params.range_atr_mult
 
+    def should_trade_trend_following(self):
+        if self.current_regime == 'trending':
+            return True
+        elif self.current_regime == 'ranging':
+            return False
+        else:
+            return self.regime_confidence > 0.7
+        
+    def notify_order(self, order):
+        if order.status in [order.Submitted, order.Accepted]:
+            return
+        self.order = None
 
+    def notify_trade(self, trade):
+        if trade.isclosed:
+            self.log(f'{self.data.datetime.data[0]} Trade PnL: {trade.pnl:.2f}')
 
     def next(self):
-        if not self.position and self.cross > 0:
-            self.buy()
-        elif self.position and self.cross < 0:
-            self.close()
+        if self.order:
+            return
+        
+        current_vol = self.calculate_volatility()
+        if current_vol > 0:
+            self.volatility_history.append(current_vol)
+            if len(self.volatility_history) > self.params.volatility_loopback:
+                self.volatility_history = self.volatility_history[-self.params.volatility_loopback:]
+        self.update_regime_state()
+        if self.position:
+            stop_multiplier = self.get_adaptive_stop_multiplier()
+            if not self.trail_order:
+                if self.position.size > 0:
+                    self.trail_order = self.sell(
+                        exectype=bt.Order.StopTrail,
+                        trailamount = self.atr[0] * stop_multiplier,
+                        size = self.position.size
+                    )
+                else:
+                    self.trail_order = self.buy(
+                        exectype = bt.Order.StopTrail,
+                        trailamount = self.atr[0] * stop_multiplier,
+                        size = abs(self.position.size)
+                    )
 
+            if self.position.size > 0:
+                if (self.ma_fast[0] < self.ma_slow[0]) or (self.current_regime == 'trending'):
+                    self.cancel_trail()
+                    self.order = self.close()
+                else:
+                    if (self.ma_fast[0] > self.ma_slow[0]) or (self.current_regime == 'trending'):
+                        self.cancel_trail()
+                        self.order = self.close()
+                return
+            
+        required_bars = max(self.params.ma_slow, self.params.adx_period, self.params.bb_period)
+        if len(self) < required_bars:
+            return
+
+        if not self.should_trade_trend_following():
+            return
+        
+        
 
 
 

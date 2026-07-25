@@ -103,13 +103,35 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
                 
     def calculate_regime_position_size(self):
         try:
-            return self.params.max_position_pct
+            base_size = self.params.max_position_pct
+            if self.current_regime == 'trending':
+                size_factor = 1.0
+            elif self.current_regime == 'ranging':
+                size_factor = 0.3
+            else:
+                size_factor = 0.1
+            confidence_factor = max(0.5, self.regime_confidence)
+            final_size = base_size * size_factor * confidence_factor
+            return max(self.params.min_position_pct, min(self.params.max_position_pct, final_size))
         except:
             return self.params.min_position_pct
-        
-        
-        
-        
+
+    def calculate_adaptive_stop_multiplier(self):
+        if self.current_regime == 'trending':
+            best_mult = self.params.trail_atr_mult
+            if len(self.volatility_history) >= 5:
+                current_vol = self.volatility_history[-1]
+                avg_vol = np.mean(self.volatility_history[-10:]) if len(self.volatility_history) >= 10 else np.mean(self.volatility_history)
+                if current_vol > avg_vol * 1.2:
+                    return best_mult * 1.3
+                elif current_vol < avg_vol * 0.8:
+                    return best_mult * 0.8
+            return best_mult
+        else:
+            return self.params.range_atr_mult
+
+
+
     def next(self):
         if not self.position and self.cross > 0:
             self.buy()

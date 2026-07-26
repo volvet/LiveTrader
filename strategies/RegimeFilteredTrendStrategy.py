@@ -21,6 +21,7 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
     )
     
     def __init__(self):
+        self.dataclose = self.datas[0].close
         self.ma_fast = bt.indicators.SMA(period=self.params.ma_fast)
         self.ma_slow = bt.indicators.SMA(period=self.params.ma_slow)
         self.adx = bt.indicators.ADX(period=self.params.adx_period)
@@ -190,7 +191,35 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
         if not self.should_trade_trend_following():
             return
         
-        
+        ma_bullish_cross = self.ma_fast[0] > self.ma_slow[0] and self.ma_fast[-1] <= self.ma_slow[-1]
+        ma_bearish_cross = self.ma_fast[0] < self.ma_slow[0] and self.ma_fast[-1] >= self.ma_slow[-1]
+        position_size_pct = self.calculate_regime_position_size()
+        current_price = self.dataclose[0]
+        if ma_bullish_cross:
+            self.cancel_trail()
+            cash = float(self.boker.get_cash())
+            target_value = cash * position_size_pct
+            shares = target_value / max(current_price, 1e-12)
+            self.order = self.buy(size=shares)
+        elif ma_bearish_cross:
+            self.cancel_trail()
+            cash = float(self.boker.get_cash())
+            target_value = cash * position_size_pct
+            shares = target_value / max(current_price, 1e-12)
+            self.order = self.sell(size=shares)
+        elif (self.current_regime == 'trending') and (self.regime_confidence > 0.8):
+            ma_spread = self.ma_fast[0] - self.ma_slow[0]
+            if ma_spread > 0.03:
+                cash = float(self.boker.get_cash())
+                target_value = cash * position_size_pct * 0.7
+                shares = target_value / max(current_price, 1e-12)
+                self.order = self.buy(size=shares)
+            elif ma_spread < -0.03:
+                cash = float(self.boker.get_cash())
+                target_value = cash * position_size_pct * 0.7
+                shares = target_value / max(current_price, 1e-12)
+                self.order = self.sell(size=shares)
+
 
 
 

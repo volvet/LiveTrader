@@ -4,13 +4,13 @@ import pandas as pd
 
 def backtest(ticker,
              strategy_class,
-             start_data='2023-01-01',
-             end_data='2025-12-31',
+             start_date='2023-01-01',
+             end_date='2025-12-31',
              initial_cash = 10000.0,
              commission = 0.001
              ):
     try:
-        data = yf.download(ticker, start_data=start_data, end=end_data)
+        data = yf.download(ticker, start=start_date, end=end_date)
         data = data.droplevel(1, axis=1) if isinstance(data.columns, pd.MultiIndex) else data
     except Exception as e:
         print(f"Error downloading data for {ticker}: {e}")

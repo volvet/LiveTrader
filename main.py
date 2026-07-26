@@ -9,7 +9,9 @@ from strategies.ChainStrategy import ChainStrategy
 from strategies.MultilineIndicatorStrategy import MultilineIndicatorStrategy
 from strategies.AdxStrategy import AdxStrategy
 from strategies.BollingerBandsStrategy import BBandsMeansReversionStrategy
+from strategies.RegimeFilteredTrendStrategy import RegimeFilteredTrendStrategy
 from utils.net import setup_proxy, PROXY
+from backtest.backtest import backtest
 
 def main():
     setup_proxy(PROXY)
@@ -48,4 +50,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    setup_proxy(PROXY)
+    backtest('AAPL', RegimeFilteredTrendStrategy, start_date='2023-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
+    

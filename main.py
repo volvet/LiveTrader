@@ -13,6 +13,11 @@ from strategies.RegimeFilteredTrendStrategy import RegimeFilteredTrendStrategy
 from utils.net import setup_proxy, PROXY
 from backtest.backtest import backtest
 
+
+
+TICKERS = ['ADA-USD', 'AAPL', 'BRK.B']
+
+
 def main():
     setup_proxy(PROXY)
     ticker = 'AAPL'
@@ -39,7 +44,7 @@ def main():
     cerebro = bt.Cerebro()
     cerebro.adddata(data)
 
-    initial_cash = 10000.0
+    initial_cash = 100000.0
     cerebro.broker.setcash(initial_cash)
     commission = 0.001  # 0.1% commission
     cerebro.broker.setcommission(commission=commission)
@@ -51,5 +56,5 @@ def main():
 
 if __name__ == "__main__":
     setup_proxy(PROXY)
-    backtest('AAPL', RegimeFilteredTrendStrategy, start_date='2023-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
+    backtest(TICKERS[0], RegimeFilteredTrendStrategy, start_date='2018-01-01', end_date='2025-01-01', initial_cash=100000.0, commission=0.001)
     

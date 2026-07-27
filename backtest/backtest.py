@@ -33,7 +33,7 @@ def backtest(ticker,
     final_value = cerebro.broker.getvalue()
     ret = (final_value - start_value) / start_value * 100.0
     print(f'Backtest completed for {ticker} using {strategy_class.__name__}')
-    print(f'Initial {start_value}, Final {final_value}, Return: {ret:.2f}%')
+    print(f'Initial {start_value:.2f}, Final {final_value:.2f}, Return: {ret:.2f}%')
     
     sh = strats[0].analyzers.sharpe_ratio.get_analysis()
     dd = strats[0].analyzers.drawdown.get_analysis()

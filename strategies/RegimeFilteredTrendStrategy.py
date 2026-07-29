@@ -196,17 +196,16 @@ class RegimeFilteredTrendStrategy(bt.Strategy):
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
             return
-        if order.status in [order.Completed]:
-            if order.isbuy():
-                self.log(f'BUY EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
-            elif order.issell():
-                self.log(f'SELL EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
+        #if order.status in [order.Completed]:
+            #if order.isbuy():
+            #    self.log(f'BUY EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
+            #elif order.issell():
+            #    self.log(f'SELL EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
         self.order = None
 
     def notify_trade(self, trade):
         if trade.isclosed:
-            #self.log(f'Trade PnL: {trade.pnl:.2f}')
-            pass
+            self.log(f'OPERATION PROFIT, GROSS {trade.pnl:.2f}, NET {trade.pnlcomm:.2f}, COMM {trade.commission:.2f}')
 
     def next(self):
         # Skip if order is pending

@@ -15,7 +15,7 @@ from backtest.backtest import backtest
 
 
 
-TICKERS = ['ADA-USD', 'AAPL', 'BRK.B']
+TICKERS = ['ADA-USD', 'AAPL', 'BRK-B']
 
 
 def main():
@@ -56,5 +56,5 @@ def main():
 
 if __name__ == "__main__":
     setup_proxy(PROXY)
-    backtest(TICKERS[0], RegimeFilteredTrendStrategy, start_date='2018-01-01', end_date='2025-01-01', initial_cash=100000.0, commission=0.001)
+    backtest(TICKERS[2], RegimeFilteredTrendStrategy, start_date='2018-01-01', end_date='2025-01-01', initial_cash=100000.0, commission=0.001)
     

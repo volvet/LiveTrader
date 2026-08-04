@@ -10,6 +10,7 @@ from strategies.MultilineIndicatorStrategy import MultilineIndicatorStrategy
 from strategies.AdxStrategy import AdxStrategy
 from strategies.BollingerBandsStrategy import BBandsMeansReversionStrategy
 from strategies.RegimeFilteredTrendStrategy import RegimeFilteredTrendStrategy
+from strategies.RelativeMomentumAccelStrategy import RelativeMomentumAccelStrategy
 from utils.net import setup_proxy, PROXY
 from backtest.backtest import backtest
 
@@ -56,5 +57,5 @@ def main():
 
 if __name__ == "__main__":
     setup_proxy(PROXY)
-    backtest(TICKERS[2], RegimeFilteredTrendStrategy, start_date='2018-01-01', end_date='2025-01-01', initial_cash=100000.0, commission=0.001)
+    backtest(TICKERS[2], RelativeMomentumAccelStrategy, start_date='2018-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
     

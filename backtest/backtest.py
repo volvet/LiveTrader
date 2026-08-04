@@ -18,6 +18,7 @@ def backtest(ticker,
     
     data_feed = bt.feeds.PandasData(dataname=data)
     cerebro = bt.Cerebro()
+    #cerebro.addsizer(bt.sizers.AllInSizer)
     cerebro.adddata(data_feed)
     cerebro.broker.setcash(initial_cash)
     cerebro.broker.setcommission(commission=commission)

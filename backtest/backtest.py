@@ -58,7 +58,7 @@ def backtest(ticker,
     #plt.rcParams['font.size'] = 10
     if plot:
         cerebro.plot(iplot=False)
-    return
+    return ret
     
     
     

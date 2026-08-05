@@ -29,10 +29,10 @@ class RelativeMomentumAccelStrategy(bt.Strategy):
         if order.status in [order.Submitted, order.Accepted]:
             return
         if order.status in [order.Completed]:
-            #if order.isbuy():
-            #    self.log(f'BUY EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
-            #elif order.issell():
-            #    self.log(f'SELL EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
+            if order.isbuy():
+                self.log(f'BUY EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
+            elif order.issell():
+                self.log(f'SELL EXECUTED, Price: {order.executed.price:.2f}, Cost: {order.executed.value:.2f}, Comm: {order.executed.comm:.2f}')
             if self.position and self.stop_price is None:
                 if order.isbuy():
                     self.highest_price_since_entry = self.data.high[0]

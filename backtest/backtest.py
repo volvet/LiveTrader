@@ -8,7 +8,8 @@ def backtest(ticker,
              end_date='2025-12-31',
              initial_cash = 10000.0,
              commission = 0.001,
-             retry = 3
+             retry = 3,
+             plot = True
              ):
     for attempt in range(retry):
         data = yf.download(ticker, start=start_date, end=end_date)
@@ -55,7 +56,8 @@ def backtest(ticker,
 
     #plt.rcParams['figure.figsize'] = [10, 6]
     #plt.rcParams['font.size'] = 10
-    cerebro.plot(iplot=False)
+    if plot:
+        cerebro.plot(iplot=False)
     return
     
     

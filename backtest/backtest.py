@@ -7,15 +7,22 @@ def backtest(ticker,
              start_date='2023-01-01',
              end_date='2025-12-31',
              initial_cash = 10000.0,
-             commission = 0.001
+             commission = 0.001,
+             retry = 3
              ):
-    try:
+    for attempt in range(retry):
         data = yf.download(ticker, start=start_date, end=end_date)
         data = data.droplevel(1, axis=1) if isinstance(data.columns, pd.MultiIndex) else data
-    except Exception as e:
-        print(f"Error downloading data for {ticker}: {e}")
+        if data is None or data.empty:
+            print(f"No data found for {ticker} between {start_date} and {end_date}.")
+            continue
+        else:
+            print(f"Data for {ticker} downloaded successfully. Data shape: {data.shape}")
+            break
+    else:
+        print(f"Failed to download data for {ticker} after {retry} attempts.")
         return
-    
+
     data_feed = bt.feeds.PandasData(dataname=data)
     cerebro = bt.Cerebro()
     #cerebro.addsizer(bt.sizers.AllInSizer)

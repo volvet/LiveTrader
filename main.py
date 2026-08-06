@@ -12,6 +12,7 @@ from strategies.AdxStrategy import AdxStrategy
 from strategies.BollingerBandsStrategy import BBandsMeansReversionStrategy
 from strategies.RegimeFilteredTrendStrategy import RegimeFilteredTrendStrategy
 from strategies.RelativeMomentumAccelStrategy import RelativeMomentumAccelStrategy
+from strategies.KeltnerBreakoutstrategy import KeltnerBreakoutStrategy
 from utils.net import setup_proxy, PROXY
 from backtest.backtest import backtest
 
@@ -70,9 +71,12 @@ TICKERS = ['AAPL',
 def main():
     setup_proxy(PROXY)
     ret_sum = 0.0
-    testset = random.sample(TICKERS, 1)
+    testset = TICKERS #random.sample(TICKERS, 1)
     for ticker in testset:
-        ret = backtest(ticker, RelativeMomentumAccelStrategy, start_date='2018-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
+        ret = backtest(ticker, KeltnerBreakoutStrategy, start_date='2018-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
+        if not ret:
+            print(f"Backtest failed for {ticker}. Skipping to next ticker.")
+            continue
         ret_sum += ret
     avg_ret = ret_sum / len(testset)
     print(f"Average return across tickers: {avg_ret:.2f}%")

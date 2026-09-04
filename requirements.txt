@@ -1,3 +1,5 @@
 backtrader
 pandas
 yfinance
+tensorflow
+keras

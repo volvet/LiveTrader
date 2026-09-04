@@ -74,7 +74,7 @@ def main():
     ret_sum = 0.0
     testset =  random.sample(TICKERS, 1)
     for ticker in testset:
-        ret = backtest(ticker, KeltnerChannelRSIBreakoutStrategy, start_date='2018-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
+        ret = backtest(ticker, KeltnerBreakoutStrategy, start_date='2026-01-01', end_date='2026-08-10', initial_cash=10000.0, commission=0.001)
         if not ret:
             print(f"Backtest failed for {ticker}. Skipping to next ticker.")
             continue

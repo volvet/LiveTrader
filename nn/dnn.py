@@ -1,4 +1,4 @@
-
+import os
 import sys
 import numpy as np
 import math
@@ -24,7 +24,11 @@ class Agent:
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
 
-        self.model = load_model(sys.path[0] + "/models/" + model_name) if is_eval else self._model()
+        if is_eval or os.path.exists(sys.path[0] + "/models/" + model_name):
+            print("Loading existing model from " + sys.path[0] + "/models/" + model_name)
+            self.model = load_model(sys.path[0] + "/models/" + model_name)
+        else:
+            self.model = self._model()
         self.target_model = keras.models.clone_model(self.model)
         self.target_model.compile(loss = "mse", optimizer = Adam(learning_rate=0.001))
         self.target_model.set_weights(self.model.get_weights())
@@ -51,8 +55,8 @@ class Agent:
         l = len(self.memory)
         for i in range(l - batch_size + 1, l):
             mini_batch.append(self.memory[i])
-        i = 0
-        print(f"Experience replay on {len(mini_batch)} samples")
+        loss = 0
+        acc = 0
         for state, action, reward, next_state, done in mini_batch:
             target = reward
             if not done:
@@ -61,12 +65,12 @@ class Agent:
             target_f = self.target_model.predict(state)
             target_f[0][action] = target
             history = self.model.fit(state, target_f, epochs=1, verbose='auto')
-            if i % 10 == 0:
-                print(f"Iterator {i} loss: {history.history['loss'][0]}")
-            i = i + 1
+            loss = history.history['loss'][0]
+            acc = history.history['accuracy'][0] if 'accuracy' in history.history else 0
         self.target_model.set_weights(self.model.get_weights())
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
+        return loss, acc
 
 # prints formatted price
 def formatPrice(n):
@@ -105,7 +109,7 @@ keras.utils.disable_interactive_logging()
 
 stock_name, window_size, episode_count = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
 
-agent = Agent(window_size)
+agent = Agent(window_size, is_eval=False, model_name="model_ep.keras")
 data = getStockDataVec(stock_name)
 l = len(data) - 1
 batch_size = 32
@@ -144,7 +148,7 @@ for e in range(episode_count + 1):
             print ("--------------------------------")
 
         if len(agent.memory) > batch_size:
-            agent.expReplay(batch_size)
+            loss, acc = agent.expReplay(batch_size)
+            print(f"{t}/{l}/{e} Replay Loss: {loss} | Accuracy: {acc}")
 
-    if e % 10 == 0:
-        agent.model.save(sys.path[0]+ "/models/model_ep" + str(e) + '.keras')
+    agent.model.save(sys.path[0]+ "/models/model_ep" + str(e) + '.keras')

@@ -28,7 +28,7 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2023-01-01', retry=3
     while True:
         action = env.action_space.sample()  # Random action for demonstration
         observation, reward, terminated, truncated, info = env.step(action)
-        print(f"Action: {action}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}")
+        print(f"Action: {action}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}, {observation.shape}")
         if terminated or truncated:
             observation, info = env.reset()
             break

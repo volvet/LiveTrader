@@ -1,4 +1,5 @@
 import os
+import sys
 import gymnasium as gym
 import numpy as np
 import yfinance as yf
@@ -39,7 +40,7 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2023-01-01', retry=3
         #action = env.action_space.sample()  # Random action for demonstration
         action = agent.get_action(np.expand_dims(observation[:,1].squeeze(), axis=0), epsilon)
         next_observation, reward, terminated, truncated, info = env.step(action)
-        print(f"Action: {action}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}, {observation.shape}, Info: {info}")
+        print(f"{env._current_tick}/{env._end_tick} Action: {action}, Reward: {reward}, Terminated: {terminated}, Truncated: {truncated}, {observation.shape}, Info: {info}")
         if terminated or truncated:
             observation, info = env.reset()
             break
@@ -53,6 +54,7 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2023-01-01', retry=3
     #plt.cla()
     #env.unwrapped.render_all()
     #plt.show()
+    agent.network.save(sys.path[0]+ "/models/model_dqn" + '.keras')
 
 if __name__ == "__main__":
     PROXY = 'http://127.0.0.1:7897'

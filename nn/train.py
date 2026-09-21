@@ -1,5 +1,6 @@
 import os
 import sys
+from pathlib import Path
 import gymnasium as gym
 import numpy as np
 import yfinance as yf
@@ -9,21 +10,18 @@ import matplotlib.pyplot as plt
 from trade_env import StocksEnv
 from dqn_agent import DQNAgent, DQNConfig
 
+# Ensure imports like "from utils..." work no matter where this script is run from.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+import utils.net
 
-def train(ticker='AAPL', start_date='2020-01-01', end_date='2023-01-01', retry=3):
+
+def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', retry=3):
     print('Training the agent...')
-    for attempt in range(retry):
-        data = yf.download(ticker, start=start_date, end=end_date)
-        data = data.droplevel(1, axis=1) if isinstance(data.columns, pd.MultiIndex) else data
-        if data is None or data.empty:
-            print(f"No data found for {ticker} between {start_date} and {end_date}.")
-            continue
-        else:
-            print(f"Data for {ticker} downloaded successfully. Data shape: {data.shape}")
-            break
-    else:
-        print(f"Failed to download data for {ticker} after {retry} attempts.")
-        return
+    data = utils.net.download_data(ticker, start_date, end_date, retry)
+    if data is None:
+        return    
 
     env = StocksEnv(data, window_size=30, render_mode='human', frame_bound=(30, len(data)))
     print(f"Environment created with observation space: {env.observation_space} and action space: {env.action_space}")
@@ -54,12 +52,10 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2023-01-01', retry=3
     #plt.cla()
     #env.unwrapped.render_all()
     #plt.show()
-    agent.network.save(sys.path[0]+ "/models/model_dqn" + '.keras')
+    agent.qnet.save(str(PROJECT_ROOT)+ "/models/model_dqn_v0" + '.keras')
 
 if __name__ == "__main__":
-    PROXY = 'http://127.0.0.1:7897'
-    os.environ['HTTP_PROXY'] = PROXY
-    os.environ['HTTPS_PROXY'] = PROXY
+    utils.net.setup_proxy(utils.net.PROXY)
     train()
 
 

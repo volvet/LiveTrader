@@ -1,7 +1,15 @@
 
+import os
+import sys
 from collections import deque
 from tensorflow import keras
 import numpy as np
+from pathlib import Path
+
+# Ensure imports like "from utils..." work no matter where this script is run from.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 
 class DQNConfig:
@@ -17,7 +25,13 @@ class DQNConfig:
 class DQNAgent():
     def __init__(self, config):
         self.config = config
-        self.qnet = keras.Sequential([
+        self.model_name = "model_dqn_v0.keras"
+        
+        if os.path.exists(str(PROJECT_ROOT) + "/models/" + self.model_name):
+            print("Loading existing model from " + str(PROJECT_ROOT) + "/models/" + self.model_name)
+            self.qnet = keras.models.load_model(str(PROJECT_ROOT) + "/models/" + self.model_name)
+        else:
+            self.qnet = keras.Sequential([
                     keras.layers.Dense(64, activation='relu', input_dim = config.input_dim),
                     keras.layers.Dense(32, activation='relu'),
                     keras.layers.Dense(8, activation='relu'),
@@ -41,6 +55,9 @@ class DQNAgent():
 
         loss = self.exp_replay()
         print('Loss:', loss)
+        
+    def save(self):
+        self.qnet.save(str(PROJECT_ROOT)+ "/models/" + self.model_name)
 
     def exp_replay(self):
         loss = 0

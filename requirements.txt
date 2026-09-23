@@ -4,3 +4,4 @@ yfinance
 tensorflow
 keras
 gymnasium
+gym-trading-env

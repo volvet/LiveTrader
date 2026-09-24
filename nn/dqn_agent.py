@@ -1,8 +1,9 @@
 
 import os
 import sys
+import warnings
 from collections import deque
-from tensorflow import keras
+import keras
 import numpy as np
 from pathlib import Path
 
@@ -32,7 +33,8 @@ class DQNAgent():
             self.qnet = keras.models.load_model(str(PROJECT_ROOT) + "/models/" + self.model_name)
         else:
             self.qnet = keras.Sequential([
-                    keras.layers.Dense(64, activation='relu', input_dim = config.input_dim),
+                    keras.Input(shape = (config.input_dim,)),
+                    keras.layers.Dense(64, activation='relu'),
                     keras.layers.Dense(32, activation='relu'),
                     keras.layers.Dense(8, activation='relu'),
                     keras.layers.Dense(config.output_dim, activation='linear')])
@@ -51,13 +53,25 @@ class DQNAgent():
         self.replay_buffer.append((state, action, reward, next_state, done))
 
         if len(self.replay_buffer) < self.config.batch_size:
-            return
+            return np.nan
 
         loss = self.exp_replay()
-        print('Loss:', loss)
+        return loss
         
     def save(self):
-        self.qnet.save(str(PROJECT_ROOT)+ "/models/" + self.model_name)
+        model_dir = PROJECT_ROOT / "models"
+        model_dir.mkdir(parents=True, exist_ok=True)
+        model_path = model_dir / self.model_name
+
+        # NumPy 2 can emit this warning from TensorFlow/Keras internals during save.
+        # If warnings are treated as errors, training stops here.
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r"__array__ implementation doesn't accept a copy keyword.*",
+                category=DeprecationWarning,
+            )
+            self.qnet.save(model_path)
 
     def exp_replay(self):
         loss = 0

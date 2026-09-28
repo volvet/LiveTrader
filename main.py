@@ -14,6 +14,7 @@ from strategies.RegimeFilteredTrendStrategy import RegimeFilteredTrendStrategy
 from strategies.RelativeMomentumAccelStrategy import RelativeMomentumAccelStrategy
 from strategies.KeltnerBreakoutstrategy import KeltnerBreakoutStrategy
 from strategies.KeltnerChannelRSIBreakoutStrategy import KeltnerChannelRSIBreakoutStrategy
+from strategies.DQNStrategy import DQNStrategy
 from utils.net import setup_proxy, PROXY
 from backtest.backtest import backtest
 from nn.train import train
@@ -73,9 +74,9 @@ TICKERS = ['AAPL',
 def main():
     setup_proxy(PROXY)
     #ret_sum = 0.0
-    #testset =  random.sample(TICKERS, 1)
+    #testset =  ['QQQ'] #random.sample(TICKERS, 1)
     #for ticker in testset:
-    #    ret = backtest(ticker, KeltnerBreakoutStrategy, start_date='2026-01-01', end_date='2026-08-10', initial_cash=10000.0, commission=0.001)
+    #    ret = backtest(ticker, DQNStrategy, start_date='2026-01-01', end_date='2026-08-10', initial_cash=10000.0, commission=0.001)
     #    if not ret:
     #        print(f"Backtest failed for {ticker}. Skipping to next ticker.")
     #        continue

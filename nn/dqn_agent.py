@@ -48,6 +48,7 @@ class DQNAgent():
             return np.random.randint(self.qnet.output_shape[-1])
         else:
             q_values = self.qnet(state)
+            #print(f"Q-values: {q_values.numpy()} for state: {state}")
             return np.argmax(q_values.numpy())
 
     def update(self, state, action, reward, next_state, done):

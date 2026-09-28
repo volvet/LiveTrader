@@ -21,7 +21,7 @@ import utils.net
 def reward_function(history):
     return np.log(history["portfolio_valuation", -1] / history["portfolio_valuation", -2]) #log (p_t / p_t-1 )
 
-def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs = 1):
+def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs = 1, resume = False):
     data = utils.net.download_data(ticker, start_date, end_date)
     if data is None:
         return
@@ -54,7 +54,8 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
     
     config = DQNConfig()
     config.input_dim = env.observation_space.shape[0]
-    config.output_dim = env.action_space.n
+    config.output_dim = int(env.action_space.n)
+    config.resume = resume
     print('DQN Config:', config)
     agent = DQNAgent(config)
 

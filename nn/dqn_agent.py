@@ -14,11 +14,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 
 class DQNConfig:
-    input_dim = 10  # Example input shape, adjust as needed
-    output_dim = 3  # Example output shape, adjust as needed
-    gamma = 0.99  # Discount factor
-    batch_size = 32
-    learning_rate = 0.001
+    input_dim:int = 10  # Example input shape, adjust as needed
+    output_dim:int = 3  # Example output shape, adjust as needed
+    gamma:float = 0.99  # Discount factor
+    batch_size:int = 32
+    learning_rate:float = 0.001
+    resume:bool = False
     
     def __str__(self):
         return f"DQNConfig(input_dim={self.input_dim}, output_dim={self.output_dim}, gamma={self.gamma}, batch_size={self.batch_size}, learning_rate={self.learning_rate})"
@@ -28,7 +29,7 @@ class DQNAgent():
         self.config = config
         self.model_name = "model_dqn_v0.keras"
         
-        if os.path.exists(str(PROJECT_ROOT) + "/models/" + self.model_name):
+        if config.resume and (os.path.exists(str(PROJECT_ROOT) + "/models/" + self.model_name)):
             print("Loading existing model from " + str(PROJECT_ROOT) + "/models/" + self.model_name)
             self.qnet = keras.models.load_model(str(PROJECT_ROOT) + "/models/" + self.model_name)
         else:

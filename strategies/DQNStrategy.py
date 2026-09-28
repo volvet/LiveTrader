@@ -11,7 +11,7 @@ from nn.dqn_agent import DQNAgent, DQNConfig
 
 class DQNStrategy(bt.Strategy):
     params = (
-        ('window_size', 30),
+        ('window_size', 60),
     )
 
     def __init__(self):
@@ -30,13 +30,14 @@ class DQNStrategy(bt.Strategy):
         if self.order:
             return
 
-        if len(self) < self.params.window_size:
+        if len(self) < self.params.window_size + 1:
             return
 
         state = []
-        for i in range(-self.params.window_size, 0):
+        for i in range(-self.params.window_size-1, 0):
             state.append(self.dataclose[i])
-        state = np.array(state).reshape(1, -1)
+        state = np.diff(state) / state[:-1]  # Convert to percentage change
+        state = state.reshape(1, -1)
         action = self.dqn_agent.get_action(state)
         print(f"Action taken: {action} at price {self.dataclose[0]}")
         ## TODO: Implement the logic to execute buy/sell based on the action returned by the DQN agent.

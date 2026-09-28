@@ -21,7 +21,7 @@ import utils.net
 def reward_function(history):
     return np.log(history["portfolio_valuation", -1] / history["portfolio_valuation", -2]) #log (p_t / p_t-1 )
 
-def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs = 1, resume = False):
+def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs = 1, resume = False, epsilon = 1.0):
     data = utils.net.download_data(ticker, start_date, end_date)
     if data is None:
         return
@@ -39,7 +39,7 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
         "TradingEnv",
         name = "TradingEnv-v0",
         df = df,
-        windows= 30,
+        windows= 60,
         positions = [0, 1], # From -1 (=SHORT), to +1 (=LONG)
         initial_position = 0, #Initial position
         trading_fees = 0.01/100, # 0.01% per stock buy / sell

@@ -85,7 +85,7 @@ def main():
     #print(f"Average return across tickers: {avg_ret:.2f}%")
     ticker = 'QQQ'
     train(ticker, start_date='2025-01-01', end_date='2025-12-31', epochs=1, resume=True, epsilon=0)
-    backtest(ticker, DQNStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
+    #backtest(ticker, DQNStrategy, start_date='2025-01-01', end_date='2025-12-31', initial_cash=10000.0, commission=0.001)
 
 
 if __name__ == "__main__":

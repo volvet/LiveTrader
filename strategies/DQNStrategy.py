@@ -34,8 +34,8 @@ class DQNStrategy(bt.Strategy):
             return
 
         state = []
-        for i in range(-self.params.window_size-1, 0):
-            state.append(self.dataclose[i])
+        for i in range(0, self.params.window_size + 1):
+            state.append(self.dataclose[-self.params.window_size - 1 + i])
         state = np.diff(state) / state[:-1]  # Convert to percentage change
         state = state.reshape(1, -1)
         action = self.dqn_agent.get_action(state)

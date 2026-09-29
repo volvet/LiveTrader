@@ -89,10 +89,10 @@ class DQNAgent():
             target_f = self.qnet(state).numpy()
             target_f[0][action] = target
             history = self.qnet.fit(state, target_f, epochs=1, verbose=0)
-            loss = history.history['loss'][0]
+            loss += history.history['loss'][0]
 
         self.target_qnet.set_weights(self.qnet.get_weights())
-        return loss
+        return loss/batch_size
 
 
 

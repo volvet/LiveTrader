@@ -65,7 +65,6 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
     #print(f'observation.shape: {observation.shape}')
     #print(observation)
     for epoch in range(epochs):
-        epsilon = 1.0
         while not done and not truncated:
             action = agent.get_action(observation, epsilon)
             next_observation, reward, done, truncated, info = env.step(action)

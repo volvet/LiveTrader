@@ -34,11 +34,15 @@ class DQNAgent():
             self.qnet = keras.models.load_model(str(PROJECT_ROOT) + "/models/" + self.model_name)
         else:
             self.qnet = keras.Sequential([
-                    keras.Input(shape = (config.input_dim,)),
-                    keras.layers.Dense(64, activation='relu'),
-                    keras.layers.Dense(32, activation='relu'),
-                    keras.layers.Dense(8, activation='relu'),
-                    keras.layers.Dense(config.output_dim, activation='linear')])
+                keras.Input(shape=(int(config.input_dim),1, )),
+                keras.layers.Conv1D(filters=64, kernel_size=6, padding='same', activation='tanh'),
+                keras.layers.MaxPooling1D(pool_size=2),
+                keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='tanh'),
+                keras.layers.MaxPooling1D(pool_size=2),
+                keras.layers.Flatten(),
+                keras.layers.Dense(64, activation="relu"),
+                keras.layers.Dense(int(config.output_dim), activation="linear"),
+            ])
         self.qnet.compile(loss='mse', optimizer=keras.optimizers.Adam(learning_rate=config.learning_rate))
         self.target_qnet = keras.models.clone_model(self.qnet)
         self.replay_buffer = deque(maxlen = 1000)
@@ -47,6 +51,7 @@ class DQNAgent():
         if np.random.rand() < epsilon:
             return np.random.randint(self.qnet.output_shape[-1])
         else:
+            state = np.expand_dims(state, axis=-1)
             q_values = self.qnet(state)
             #print(f"Q-values: {q_values.numpy()} for state: {state}")
             return np.argmax(q_values.numpy())
@@ -88,6 +93,7 @@ class DQNAgent():
                 target += self.config.gamma * np.max(self.target_qnet(next_state).numpy())
             target_f = self.qnet(state).numpy()
             target_f[0][action] = target
+            state = np.expand_dims(state, axis=-1)
             history = self.qnet.fit(state, target_f, epochs=1, verbose=0)
             loss += history.history['loss'][0]
 

@@ -19,7 +19,7 @@ import utils.net
 
 # Create your own reward function with the history object
 def reward_function(history):
-    return np.log(history["portfolio_valuation", -1] / history["portfolio_valuation", -2]) #log (p_t / p_t-1 )
+    return (history["portfolio_valuation", -1] - history["portfolio_valuation", -2]) #log (p_t / p_t-1 )
 
 def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs = 1, resume = False, epsilon = 1.0):
     data = utils.net.download_data(ticker, start_date, end_date)
@@ -39,7 +39,7 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
         "TradingEnv",
         name = "TradingEnv-v0",
         df = df,
-        windows= 60,
+        windows= 30,
         positions = [0, 1], # From -1 (=SHORT), to +1 (=LONG)
         initial_position = 0, #Initial position
         trading_fees = 0.01/100, # 0.01% per stock buy / sell
@@ -65,6 +65,9 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
     #print(f'observation.shape: {observation.shape}')
     #print(observation)
     for epoch in range(epochs):
+        done, truncated = False, False
+        observation, info = env.reset()
+        observation = np.expand_dims(observation[:,0].squeeze(), axis=0)
         while not done and not truncated:
             action = agent.get_action(observation, epsilon)
             next_observation, reward, done, truncated, info = env.step(action)
@@ -72,10 +75,8 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
             #print(f'next_observation.shape: {next_observation.shape}')
             #print(next_observation)
             if done or truncated:
-                print(f'Eposh {epoch}/{epochs} finished with portfolio value: {env.historical_info[-1]["portfolio_valuation"]}')
-                observation, info = env.reset()
-                observation = np.expand_dims(observation[:,0].squeeze(), axis=0)
-                break
+                print(f'Epoch {epoch}/{epochs} finished with portfolio value: {env.historical_info[-1]["portfolio_valuation"]}')
+                continue
             loss =agent.update(next_observation, 
                          action, 
                          reward,
@@ -83,17 +84,13 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
                          done)
             
             print(f"{epoch}/{epochs} {env._idx}/{length} Action: {action}, Reward: {reward:.2f}, Truncated: {truncated}, Portfolio: {env.historical_info[-1]['portfolio_valuation']:.2f}, Loss {loss}")
-            epsilon = max(0.01, epsilon * 0.995)  # Decay epsilon
+            epsilon = max(0.10, epsilon * 0.995)  # Decay epsilon
             observation = next_observation
             
         # Save the model after each epoch
         agent.save()
-        
 
-if __name__ == "__main__":
-    utils.net.setup_proxy(utils.net.PROXY)
-    #train()
-    train()
+
     
 
 

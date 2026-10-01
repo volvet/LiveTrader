@@ -133,6 +133,7 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
     config.resume = resume
     agent = PolicyAgent(config)
 
+    reward_ratio = 0.0
     for epoch in range(epochs):
         print(f"Starting epoch {epoch+1}/{epochs}")
         done, truncated = False, False
@@ -163,11 +164,13 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
             observation = next_observation
             if done or truncated:
                 print(f'Epoch {epoch+1}/{epochs} finished with portfolio value: {env.historical_info[-1]["portfolio_valuation"]}')
+                reward_ratio += env.historical_info[-1]["portfolio_valuation"] / env.historical_info[0]["portfolio_valuation"] - 1
                 break
         # Update the agent with the collected transitions after each episode
         agent.update(transition_dict)
 
         if epoch % 10 == 0 and epoch != 0:
             agent.save()
+    print(f"Average reward ratio across epochs: {reward_ratio/epochs}")
 
 

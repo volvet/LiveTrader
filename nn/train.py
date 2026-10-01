@@ -130,12 +130,13 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
     config = PolicyConfig()
     config.input_dim = env.observation_space.shape[0]
     config.output_dim = env.action_space.n
+    config.resume = resume
     agent = PolicyAgent(config)
 
     for epoch in range(epochs):
         print(f"Starting epoch {epoch+1}/{epochs}")
         done, truncated = False, False
-        env = create_env(df)
+        #env = create_env(df)
         observation, info = env.reset()
         observation = np.expand_dims(observation[:,0].squeeze(), axis=0)
 
@@ -165,5 +166,8 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
                 break
         # Update the agent with the collected transitions after each episode
         agent.update(transition_dict)
+
+        if epoch % 10 == 0 and epoch != 0:
+            agent.save()
 
 

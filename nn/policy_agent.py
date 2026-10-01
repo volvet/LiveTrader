@@ -1,7 +1,14 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
+import sys
+import os
+from pathlib import Path
 
+# Ensure imports like "from utils..." work no matter where this script is run from.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 class PolicyConfig():
     input_dim: int = 30
@@ -29,7 +36,12 @@ class PolicyNetwork(torch.nn.Module):
 class PolicyAgent:
     def __init__(self, config):
         self.config = config
-        self.policy_network = PolicyNetwork(config.input_dim, config.output_dim)
+        self.model_name = "model_policy_v0.torch"
+        if config.resume and (os.path.exists(str(PROJECT_ROOT) + "/models/" + self.model_name)):
+            print("Loading existing model from " + str(PROJECT_ROOT) + "/models/" + self.model_name)
+            self.policy_network = torch.load(str(PROJECT_ROOT) + "/models/" + self.model_name, weights_only=False)
+        else:
+            self.policy_network = PolicyNetwork(config.input_dim, config.output_dim)
         self.optimizer = torch.optim.Adam(self.policy_network.parameters(), lr=config.learning_rate)
 
     def get_action(self, state):
@@ -56,3 +68,10 @@ class PolicyAgent:
            loss.backward()
        #print(f"Loss: {loss.item()} G: {G}")
        self.optimizer.step()
+
+    def save(self):
+        model_dir = PROJECT_ROOT / "models"
+        model_dir.mkdir(parents=True, exist_ok=True)
+        model_path = model_dir / self.model_name
+        torch.save(self.policy_network, model_path)
+        

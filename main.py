@@ -86,7 +86,7 @@ def main():
     ticker = 'QQQ'
     #train(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=3, resume=True, epsilon=1.0)
     #backtest(ticker, DQNStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
-    train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=500, resume=False)
+    train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=100, resume=True)
 
 if __name__ == "__main__":
     main()

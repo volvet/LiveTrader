@@ -14,12 +14,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 from nn.dqn_agent import DQNAgent, DQNConfig
+from nn.policy_agent import PolicyAgent, PolicyConfig
 import utils.net
 
 
 # Create your own reward function with the history object
 def reward_function(history):
-    return (history["portfolio_valuation", -1] - history["portfolio_valuation", -2]) #log (p_t / p_t-1 )
+    return np.log(history["portfolio_valuation", -1] / history["portfolio_valuation", -2]) #log (p_t / p_t-1 )
 
 def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs = 1, resume = False, epsilon = 1.0):
     data = utils.net.download_data(ticker, start_date, end_date)
@@ -91,8 +92,78 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
         agent.save()
 
 
+
+def create_env(df):
+    env = gym.make(
+                "TradingEnv",
+                name = "TradingEnv-v0",
+                df = df,
+                windows= 30,
+                positions = [0, 0.5, 1], # From -1 (=SHORT), to +1 (=LONG)
+                initial_position = 0, #Initial position
+                trading_fees = 0.01/100, # 0.01% per stock buy / sell
+                borrow_interest_rate= 0.0003/100, #per timestep (= 1h here)
+                reward_function = reward_function,
+                portfolio_initial_value = 10000, # in FIAT (here, USD)
+                max_episode_duration = 'max',
+                disable_env_checker= True
+    )
+    env.add_metric('Position Changes', lambda history : np.sum(np.diff(history['position']) != 0) )
+    return env
     
+def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01-01", epochs=100, resume=False):
+    data = utils.net.download_data(ticker, start_date, end_date)
+    if data is None:
+        return
+    data.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
+    df = data
+    df["feature_close"] = df["close"].pct_change()
+    df["feature_open"] = df["open"]/df["close"]
+    df["feature_high"] = df["high"]/df["close"]
+    df["feature_low"] = df["low"]/df["close"]
+    df["feature_volume"] = df["volume"] / df["volume"].rolling(7).max()
+    df.dropna(inplace= True)
+    length = df.shape[0]
+    env = create_env(df)
+    print(f"Environment created with observation space: {env.observation_space}, action space: {env.action_space}")
 
+    config = PolicyConfig()
+    config.input_dim = env.observation_space.shape[0]
+    config.output_dim = env.action_space.n
+    agent = PolicyAgent(config)
 
+    for epoch in range(epochs):
+        print(f"Starting epoch {epoch+1}/{epochs}")
+        done, truncated = False, False
+        env = create_env(df)
+        observation, info = env.reset()
+        observation = np.expand_dims(observation[:,0].squeeze(), axis=0)
+
+        episode_reward = 0
+        transition_dict = {
+                        'state': [],
+                        'action': [],
+                        'reward': [],
+                        'next_state': [],
+                        'done': []
+        }
+        while not done and not truncated:
+            action = agent.get_action(observation)
+            next_observation, reward, done, truncated, info = env.step(action)
+            #print(f"Step: action={action}, reward={reward}, done={done}, truncated={truncated}")
+            next_observation = np.expand_dims(next_observation[:,0].squeeze(), axis=0)
+
+            transition_dict['state'].append(observation)
+            transition_dict['action'].append(action)
+            transition_dict['reward'].append(reward)
+            episode_reward += reward
+            transition_dict['next_state'].append(next_observation)
+            transition_dict['done'].append(done)
+            observation = next_observation
+            if done or truncated:
+                print(f'Epoch {epoch+1}/{epochs} finished with portfolio value: {env.historical_info[-1]["portfolio_valuation"]}')
+                break
+        # Update the agent with the collected transitions after each episode
+        agent.update(transition_dict)
 
 

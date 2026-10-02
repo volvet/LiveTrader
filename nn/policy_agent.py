@@ -21,16 +21,20 @@ class PolicyNetwork(torch.nn.Module):
     CAPABILITY = 1000
     def __init__(self, input_dim, output_dim):
         super(PolicyNetwork, self).__init__()
-        self.fc1 = torch.nn.Linear(input_dim, 128)
-        self.fc2 = torch.nn.Linear(128, 64)
-        self.fc3 = torch.nn.Linear(64, 32)
-        self.fc4 = torch.nn.Linear(32, output_dim)
+        #self.fc1 = torch.nn.Linear(input_dim, 128)
+        #self.fc2 = torch.nn.Linear(128, 64)
+        #self.fc3 = torch.nn.Linear(64, 32)
+        #self.fc4 = torch.nn.Linear(32, output_dim)
+        self.rnn = torch.nn.GRU(input_dim, hidden_size = 128)
+        self.fc = torch.nn.Linear(128, output_dim)
 
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        x = torch.relu(self.fc3(x))
-        x = self.fc4(x)
+        #x = torch.relu(self.fc1(x))
+        #x = torch.relu(self.fc2(x))
+        #x = torch.relu(self.fc3(x))
+        #x = self.fc4(x)
+        x, _ = self.rnn(x)
+        x = self.fc(x)
         return F.softmax(x, dim=-1)
 
 class PolicyAgent:

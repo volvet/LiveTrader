@@ -99,7 +99,7 @@ def create_env(df):
                 name = "TradingEnv-v0",
                 df = df,
                 windows= 30,
-                positions = [0, 0.5, 1], # From -1 (=SHORT), to +1 (=LONG)
+                positions = [0, 1], # From -1 (=SHORT), to +1 (=LONG)
                 initial_position = 0, #Initial position
                 trading_fees = 0.01/100, # 0.01% per stock buy / sell
                 borrow_interest_rate= 0.0003/100, #per timestep (= 1h here)

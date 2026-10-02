@@ -15,6 +15,7 @@ from strategies.RelativeMomentumAccelStrategy import RelativeMomentumAccelStrate
 from strategies.KeltnerBreakoutstrategy import KeltnerBreakoutStrategy
 from strategies.KeltnerChannelRSIBreakoutStrategy import KeltnerChannelRSIBreakoutStrategy
 from strategies.DQNStrategy import DQNStrategy
+from strategies.PolicyNetworkStrategy import PolicyNetworkStrategy
 from utils.net import setup_proxy, PROXY
 from backtest.backtest import backtest
 from nn.train import train, train_policy_agent
@@ -85,8 +86,9 @@ def main():
     #print(f"Average return across tickers: {avg_ret:.2f}%")
     ticker = 'QQQ'
     #train(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=3, resume=True, epsilon=1.0)
-    #backtest(ticker, DQNStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
+    #backtest(ticker, PolicyNetworkStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
     train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=100, resume=True)
+    #backtest(ticker, PolicyNetworkStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
 
 if __name__ == "__main__":
     main()

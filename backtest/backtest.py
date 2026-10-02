@@ -7,7 +7,7 @@ def backtest(ticker,
              start_date='2023-01-01',
              end_date='2025-12-31',
              initial_cash = 10000.0,
-             commission = 0.001,
+             commission = 0.0001,
              retry = 3,
              plot = True
              ):

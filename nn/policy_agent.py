@@ -25,7 +25,7 @@ class PolicyNetwork(torch.nn.Module):
         #self.fc2 = torch.nn.Linear(128, 64)
         #self.fc3 = torch.nn.Linear(64, 32)
         #self.fc4 = torch.nn.Linear(32, output_dim)
-        self.rnn = torch.nn.GRU(input_dim, hidden_size = 128)
+        self.rnn = torch.nn.GRU(input_dim, hidden_size = 128, num_layers = 3)
         self.fc = torch.nn.Linear(128, output_dim)
 
     def forward(self, x):

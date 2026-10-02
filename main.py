@@ -84,11 +84,12 @@ def main():
     #    ret_sum += ret
     #avg_ret = ret_sum / len(testset)
     #print(f"Average return across tickers: {avg_ret:.2f}%")
-    ticker = 'QQQ'
-    #train(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=3, resume=True, epsilon=1.0)
-    #backtest(ticker, PolicyNetworkStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
-    train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', epochs=100, resume=True)
-    #backtest(ticker, PolicyNetworkStrategy, start_date='2026-01-01', end_date='2026-08-31', initial_cash=10000.0, commission=0.001)
+    #ticker = 'QQQ'
+    ticker = random.sample(TICKERS, 1)[0]
+    print(f"Train with dataset {ticker}")
+    train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', episode=100, resume=True)
+    print(f"Evaluation for dataset {ticker}")
+    train_policy_agent(ticker, start_date='2026-01-01', end_date='2026-09-30', episode=20, resume=True, eval=True)
 
 if __name__ == "__main__":
     main()

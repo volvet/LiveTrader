@@ -70,7 +70,7 @@ def train(ticker='AAPL', start_date='2020-01-01', end_date='2021-01-01', epochs 
         observation, info = env.reset()
         observation = np.expand_dims(observation[:,0].squeeze(), axis=0)
         while not done and not truncated:
-            action = agent.get_action(observation, epsilon)
+            action = agent.get_action(observation, epsilon=epsilon)
             next_observation, reward, done, truncated, info = env.step(action)
             next_observation = np.expand_dims(next_observation[:,0].squeeze(), axis=0)
             #print(f'next_observation.shape: {next_observation.shape}')
@@ -155,8 +155,8 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
         return evaluate_policy_agent(env, agent, episode)
 
     reward_ratio = 0.0
-    for epoch in range(episode):
-        print(f"Starting epoch {epoch+1}/{episode}")
+    for e in range(episode):
+        print(f"Starting epoch {e+1}/{episode}")
         done, truncated = False, False
         #env = create_env(df)
         observation, info = env.reset()
@@ -171,7 +171,7 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
                         'done': []
         }
         while not done and not truncated:
-            action = agent.get_action(observation)
+            action = agent.get_action(observation, epsilon=0.01)
             next_observation, reward, done, truncated, info = env.step(action)
             #print(f"Step: action={action}, reward={reward}, done={done}, truncated={truncated}")
             next_observation = np.expand_dims(next_observation[:,0].squeeze(), axis=0)
@@ -184,13 +184,13 @@ def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01
             transition_dict['done'].append(done)
             observation = next_observation
             if done or truncated:
-                print(f'Epoch {epoch+1}/{episode} finished with portfolio value: {env.historical_info[-1]["portfolio_valuation"]}')
+                print(f'Epoch {e+1}/{episode} finished with portfolio value: {env.historical_info[-1]["portfolio_valuation"]}')
                 reward_ratio += env.historical_info[-1]["portfolio_valuation"] / env.historical_info[0]["portfolio_valuation"] - 1
                 break
         # Update the agent with the collected transitions after each episode
         agent.update(transition_dict)
 
-        if epoch % 10 == 0 and epoch != 0:
+        if (e % 100 == 0 and e != 0) or (e == episode - 1):
             agent.save()
     print(f"Average reward ratio across epochs: {reward_ratio/episode}")
 

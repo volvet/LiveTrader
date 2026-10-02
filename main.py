@@ -83,8 +83,7 @@ def main():
     #    ret_sum += ret
     #avg_ret = ret_sum / len(testset)
     #print(f"Average return across tickers: {avg_ret:.2f}%")
-    #ticker = 'QQQ'
-    ticker = random.sample(TICKERS, 1)[0]
+    ticker = 'QQQ'
     print(f"Train with dataset {ticker}")
     train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', episode=100, resume=True)
     print(f"Evaluation for dataset {ticker}")

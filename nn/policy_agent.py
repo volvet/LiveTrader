@@ -48,12 +48,15 @@ class PolicyAgent:
             self.policy_network = PolicyNetwork(config.input_dim, config.output_dim)
         self.optimizer = torch.optim.Adam(self.policy_network.parameters(), lr=config.learning_rate)
 
-    def get_action(self, state):
-        state = torch.tensor(state, dtype=torch.float32)
-        probs = self.policy_network(state)
-        action_dist = torch.distributions.Categorical(probs)
-        action = action_dist.sample()
-        return action.item()
+    def get_action(self, state, epsilon=0):
+        if np.random.rand() < epsilon:
+            return np.random.randint(self.config.output_dim)
+        else:
+            state = torch.tensor(state, dtype=torch.float32)
+            probs = self.policy_network(state)
+            action_dist = torch.distributions.Categorical(probs)
+            action = action_dist.sample()
+            return action.item()
 
     def update(self, transition_dict):
        reward_list = torch.tensor(np.array(transition_dict['reward']), dtype=torch.float32)

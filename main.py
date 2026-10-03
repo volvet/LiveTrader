@@ -5,6 +5,7 @@ import os
 import random
 import pandas as pd
 import datetime
+import shutil
 
 from strategies.ChainStrategy import ChainStrategy
 from strategies.MultilineIndicatorStrategy import MultilineIndicatorStrategy
@@ -83,11 +84,18 @@ def main():
     #    ret_sum += ret
     #avg_ret = ret_sum / len(testset)
     #print(f"Average return across tickers: {avg_ret:.2f}%")
-    ticker = 'QQQ'
-    print(f"Train with dataset {ticker}")
-    train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', episode=100, resume=True)
-    print(f"Evaluation for dataset {ticker}")
-    train_policy_agent(ticker, start_date='2026-01-01', end_date='2026-09-30', episode=20, resume=True, eval=True)
+    best_reward_ratio = -10000.0
+    for i in range(20):
+        ticker = random.sample(TICKERS, 1)[0]
+        print(f"Train with dataset {ticker}")
+        train_policy_agent(ticker, start_date='2020-01-01', end_date='2025-12-31', episode=100, resume=True)
+        print(f"Evaluation for dataset {ticker}")
+        ratio = train_policy_agent('QQQ', start_date='2026-01-01', end_date='2026-09-30', episode=20, resume=True, eval=True)
+        if ratio > best_reward_ratio:
+            best_reward_ratio = ratio
+            print(f"New best reward ratio: {best_reward_ratio:.2f}")
+            # Save the best model
+            shutil.copy("models/model_policy_v0.pth", "models/best_policy_agent.pth")
 
 if __name__ == "__main__":
     main()

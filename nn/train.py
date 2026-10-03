@@ -126,8 +126,9 @@ def evaluate_policy_agent(env, agent, episode):
             if done or truncated:
                 reward_ratio += env.historical_info[-1]["portfolio_valuation"] / env.historical_info[0]["portfolio_valuation"] - 1
 
-    print(f'Evaluation finished with average reward ratio: {reward_ratio / episode}')
-    return reward_ratio / episode
+    position_changes = np.sum(np.diff(env.historical_info['position']) != 0)
+    print(f'Evaluation finished with average reward ratio: {reward_ratio / episode}, positions changes: {position_changes}')
+    return reward_ratio / episode if position_changes > 1 else -1
 
 def train_policy_agent(ticker="AAPL", start_date="2020-01-01", end_date="2023-01-01", episode=100, resume=False, eval=False):
     data = utils.net.download_data(ticker, start_date, end_date)

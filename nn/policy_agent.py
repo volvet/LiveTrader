@@ -16,6 +16,7 @@ class PolicyConfig():
     gamma: float = 0.99
     learning_rate: float = 0.001
     resume: bool = False
+    model_name: str = "model_policy_v0.pth"
 
 class PolicyNetwork(torch.nn.Module):
     CAPABILITY = 1000
@@ -40,7 +41,7 @@ class PolicyNetwork(torch.nn.Module):
 class PolicyAgent:
     def __init__(self, config):
         self.config = config
-        self.model_name = "model_policy_v0.torch"
+        self.model_name = config.model_name
         if config.resume and (os.path.exists(str(PROJECT_ROOT) + "/models/" + self.model_name)):
             print("Loading existing model from " + str(PROJECT_ROOT) + "/models/" + self.model_name)
             self.policy_network = torch.load(str(PROJECT_ROOT) + "/models/" + self.model_name, weights_only=False)
@@ -57,6 +58,11 @@ class PolicyAgent:
             action_dist = torch.distributions.Categorical(probs)
             action = action_dist.sample()
             return action.item()
+
+    def get_probs(self, state):
+        state = torch.tensor(state, dtype=torch.float32)
+        probs = self.policy_network(state)
+        return probs
 
     def update(self, transition_dict):
        reward_list = torch.tensor(np.array(transition_dict['reward']), dtype=torch.float32)

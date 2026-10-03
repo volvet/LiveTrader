@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 from nn.policy_agent import PolicyAgent, PolicyConfig
 from utils.net import setup_proxy, PROXY
+import utils.net
 
 
 if __name__ == "__main__":
@@ -33,7 +34,7 @@ if __name__ == "__main__":
 
     for ticker in tickers:
         print(f"Processing ticker: {ticker}")
-        data = yf.download(ticker, start=day_beginning, end=today)
+        data = utils.net.download_data(ticker, day_beginning, today)
         if data is None:
             continue
         data.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
